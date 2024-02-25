@@ -1,68 +1,59 @@
 /*******************************************************************************************
-*
-*	The Fragment
-*
-********************************************************************************************/
+ *
+ *	The Fragment
+ *
+ ********************************************************************************************/
 
-#include <stdlib.h>
 #include "raylib.h"
+#include <stdint.h>
+#include <stdlib.h>
 
-int main()
-{
-    // Initialization
-    //--------------------------------------------------------------------------------------
-    const int screenWidth = 1700;
-    const int screenHeight = 1000;
+int main() {
+    const int screenWidth = 1440;
+    const int screenHeight = 900;
+
+    Texture2D sprite;
+    // Sound sound;
+    Music music;
 
     InitWindow(screenWidth, screenHeight, "The Fragment");
-    
-    SetExitKey(KEY_NULL);       // Disable KEY_ESCAPE to close window, X-button still works
-    
-    bool exitWindowRequested = false;   // Flag to request window to exit
-    bool exitWindow = false;    // Flag to set window to exit
+    InitAudioDevice();
+    SetTargetFPS(60);
+    sprite = LoadTexture("texture.png");
+    // sound = LoadSound("file_name.ogg");
+    music = LoadMusicStream("music.mp3");
+    PlayMusicStream(music);
 
-    SetTargetFPS(60);           // Set our game to run at 60 frames-per-second
-    //--------------------------------------------------------------------------------------
-
-    // Main loop
-    while (!exitWindow)
-    {
+    while (!WindowShouldClose()) {
         // Update
-        //----------------------------------------------------------------------------------
-        // Detect if X-button or KEY_ESCAPE have been pressed to close window
-        if (WindowShouldClose() || IsKeyPressed(KEY_ESCAPE)) exitWindowRequested = true;
-        
-        if (exitWindowRequested)
-        {
-            // A request for close window has been issued, we can save data before closing
-            // or just show a message asking for confirmation
-            
-            if (IsKeyPressed(KEY_Y)) exitWindow = true;
-            else if (IsKeyPressed(KEY_N)) exitWindowRequested = false;
+        UpdateMusicStream(music);
+        if (IsKeyPressed(KEY_ENTER) &&
+            (IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT))) {
+            int display = GetCurrentMonitor();
+            if (IsWindowFullscreen()) {
+                SetWindowSize(screenWidth, screenHeight);
+            } else {
+                SetWindowSize(GetMonitorWidth(display),
+                              GetMonitorHeight(display));
+            }
+            ToggleFullscreen();
         }
-        //----------------------------------------------------------------------------------
+
+        if (IsKeyPressed(KEY_SPACE)) {
+            // PlaySound(sound);
+        }
 
         // Draw
-        //----------------------------------------------------------------------------------
         BeginDrawing();
-
-            ClearBackground(RAYWHITE);
-
-            if (exitWindowRequested)
-            {
-                DrawRectangle(0, 100, screenWidth, 200, BLACK);
-                DrawText("Are you sure you want to exit? [Y/N]", 40, 180, 30, WHITE);
-            }
-            else DrawText("Hello!", 120, 200, 20, LIGHTGRAY);
-
+        ClearBackground(RAYWHITE);
+        DrawTexture(sprite, 0, 0, RAYWHITE);
+        DrawText("Hello..", 240, 350, 42, DARKGRAY);
         EndDrawing();
-        //----------------------------------------------------------------------------------
     }
 
-    // De-Initialization
-    //--------------------------------------------------------------------------------------
-    CloseWindow();        // Close window and OpenGL context
-    //--------------------------------------------------------------------------------------
+    StopMusicStream(music);
+    CloseAudioDevice();
+    CloseWindow();
 
     return EXIT_SUCCESS;
 }
